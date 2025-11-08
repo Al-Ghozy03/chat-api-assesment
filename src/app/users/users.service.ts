@@ -3,12 +3,15 @@ import {
   ConflictException,
   Inject,
   Injectable,
+  NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { SUPABASE_CLIENT } from 'src/supabase/supabase.module';
 import { RegisterDto } from './dto/register.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class UsersService {
@@ -50,8 +53,51 @@ export class UsersService {
     });
     return {
       message: 'success',
-      data,
+      data: {
+        id: data.id,
+        name: data.name,
+        email: data.email,
+      },
       token,
     };
+  }
+
+  async login(body: LoginDto) {
+    try {
+      const { data: existingUser, error } = await this.supabase
+        .from('users')
+        .select('id,name,password,email')
+        .eq('email', body.email)
+        .maybeSingle();
+
+      if (error) throw new BadRequestException(error);
+
+      if (!existingUser) {
+        throw new NotFoundException('Email not found');
+      }
+      const checkPassword = await bcrypt.compare(
+        body.password,
+        existingUser.password,
+      );
+      if (!checkPassword)
+        throw new UnauthorizedException('Wrong password, try again!');
+      const token = this.jwtService.sign({
+        id: existingUser.id,
+        name: existingUser.name,
+        email: existingUser.email,
+      });
+
+      return {
+        message: 'success',
+        data: {
+          id: existingUser.id,
+          name: existingUser.name,
+          email: existingUser.email,
+        },
+        token,
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 }
