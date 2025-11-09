@@ -33,8 +33,11 @@ export class ChatGateway {
     return { status: 'joined', room };
   }
 
-  @SubscribeMessage('sendRoomMessage')
-  handleRoomMessage(@MessageBody() data: { room: string; message: string }) {
-    this.server.to(data.room).emit('roomMessage', data);
+  @SubscribeMessage('sendMessage')
+  handlePrivateMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { room: string; message: string },
+  ) {
+    this.server.to(data.room).emit('retrieveMessage', data);
   }
 }
