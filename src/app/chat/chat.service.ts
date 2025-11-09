@@ -18,11 +18,11 @@ export class ChatService {
 
   async generateRoomcode(body: GenerateRoomcodeDto) {
     try {
-      //   const checkUser1 = await this.checkUserId(body.user_1);
-      //   if (!checkUser1) throw new NotFoundException('User 1 not found');
+      const checkUser1 = await this.checkUserId(body.user_1);
+      if (!checkUser1) throw new NotFoundException('User 1 not found');
 
-      //   const checkUser2 = await this.checkUserId(body.user_2);
-      //   if (!checkUser2) throw new NotFoundException('User 2 not found');
+      const checkUser2 = await this.checkUserId(body.user_2);
+      if (!checkUser2) throw new NotFoundException('User 2 not found');
 
       const { data: checkRoom, error: errorRoom } = await this.supabase
         .from('chats')
@@ -69,7 +69,7 @@ export class ChatService {
 
   async checkUserId(id: number) {
     const { data } = await this.supabase
-      .from('chats')
+      .from('users')
       .select('*')
       .eq('id', id)
       .maybeSingle();
