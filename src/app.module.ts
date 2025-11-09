@@ -5,6 +5,7 @@ import { SupabaseModule } from './supabase/supabase.module';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './app/users/users.module';
 import { JwtModule } from '@nestjs/jwt';
+import { ChatGateway } from './chat/chat.gateway';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { JwtModule } from '@nestjs/jwt';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, ChatGateway],
   exports: [],
 })
 export class AppModule {}
