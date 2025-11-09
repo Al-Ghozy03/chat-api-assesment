@@ -5,7 +5,7 @@ import { SupabaseModule } from './supabase/supabase.module';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './app/users/users.module';
 import { JwtModule } from '@nestjs/jwt';
-import { ChatGateway } from './chat/chat.gateway';
+import { ChatModule } from './app/chat/chat.module';
 
 @Module({
   imports: [
@@ -20,9 +20,10 @@ import { ChatGateway } from './chat/chat.gateway';
       secret: process.env.JWT_SIGN,
       signOptions: { expiresIn: '30d' },
     }),
+    ChatModule,
   ],
   controllers: [AppController],
-  providers: [AppService, ChatGateway],
+  providers: [AppService],
   exports: [],
 })
 export class AppModule {}
