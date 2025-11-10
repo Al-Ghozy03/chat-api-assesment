@@ -81,8 +81,35 @@ export class ChatService {
     try {
       const { data, error } = await this.supabase
         .from('chats')
-        .select('*')
-        .or(`user_1.eq.${userId},user_2.eq.${userId}`);
+        .select(
+          ` 
+              id,
+              room_code,
+              user1:users!chats_user_1_fkey (
+                id,
+                name,
+                email,
+                avatar_url
+              ),
+              user2:users!chats_user_2_fkey (
+                id,
+                name,
+                email,
+                avatar_url
+              ),
+              messages:messages(
+                id,
+                chat_id,
+                sender_id,
+                content,
+                attachment_url,
+                created_at
+              )
+              created_at
+          `,
+        )
+        .or(`user_1.eq.${userId},user_2.eq.${userId}`)
+        .order('created_at', { foreignTable: 'messages', ascending: true });
       if (error) throw new InternalServerErrorException(error);
       return {
         message: 'success',
