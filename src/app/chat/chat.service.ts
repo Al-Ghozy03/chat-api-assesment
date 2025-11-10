@@ -16,6 +16,24 @@ export class ChatService {
     private readonly supabase: SupabaseClient,
   ) {}
 
+  async listChat(userId: number) {
+    try {
+      const { data, error } = await this.supabase
+        .from('chats')
+        .select('*')
+        .or(`user_1.eq.${userId},user_2.eq.${userId}`);
+      if (error) throw new InternalServerErrorException(error);
+      return {
+        message: 'success',
+        data,
+      };
+    } catch (error) {
+      console.error(error);
+
+      throw error;
+    }
+  }
+
   async generateRoomcode(body: GenerateRoomcodeDto) {
     try {
       const checkUser1 = await this.checkUserId(body.user_1);
