@@ -3,6 +3,8 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { SUPABASE_CLIENT } from 'src/supabase/supabase.module';
@@ -15,6 +17,65 @@ export class ChatService {
     @Inject(SUPABASE_CLIENT)
     private readonly supabase: SupabaseClient,
   ) {}
+
+  async listMessages(userId: number, chatId: number) {
+    try {
+      const { data: existChat, error: errorExistChat } = await this.supabase
+        .from('chats')
+        .select('*')
+        .eq('id', chatId)
+        .maybeSingle();
+
+      if (errorExistChat)
+        throw new InternalServerErrorException(errorExistChat);
+      if (!existChat)
+        throw new UnprocessableEntityException("Chat doesn't exist");
+      if (existChat.user_1 !== userId && existChat.user_2 !== userId)
+        throw new UnauthorizedException(
+          'You are not authorized to view this messages',
+        );
+      const { data, error } = await this.supabase
+        .from('messages')
+        .select(
+          `
+            id,
+            content,
+            attachment_url,
+            created_at,
+            chat:chats!messages_chat_id_fkey (
+              id,
+              room_code,
+              created_at,
+              user1:users!chats_user_1_fkey (
+                id,
+                name,
+                email,
+                avatar_url
+              ),
+              user2:users!chats_user_2_fkey (
+                id,
+                name,
+                email,
+                avatar_url
+              )
+            ),
+            sender:users!messages_sender_id_fkey (
+              id,
+              name,
+              email,
+              avatar_url
+            )
+          `,
+        )
+        .eq('chat_id', chatId);
+
+      if (error) throw new InternalServerErrorException(error);
+      return data;
+    } catch (er) {
+      console.error(er);
+      throw er;
+    }
+  }
 
   async listChat(userId: number) {
     try {
