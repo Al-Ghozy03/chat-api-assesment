@@ -61,7 +61,7 @@ export class ChatGateway {
   @SubscribeMessage('userStatus')
   async userStatus(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { user_id: number; status: string; last_online: Date },
+    @MessageBody() data: { user_id: number; status: string },
   ) {
     console.log('Retrieve status user: ', data);
     const { data: v, error } = await this.supabase
@@ -71,7 +71,8 @@ export class ChatGateway {
         last_online: new Date().toISOString(),
       })
       .eq('id', data.user_id)
-      .select();
+      .select()
+      .single();
     if (error) console.error(`Error insert message : ${error}`);
     this.server.emit('retrieveUserStatus', v);
   }

@@ -89,13 +89,17 @@ export class ChatService {
                 id,
                 name,
                 email,
-                avatar_url
+                avatar_url,
+                status,
+                last_online
               ),
               user2:users!chats_user_2_fkey (
                 id,
                 name,
                 email,
-                avatar_url
+                avatar_url,
+                status,
+                last_online
               ),
               messages:messages(
                 id,
