@@ -100,4 +100,21 @@ export class UsersService {
       throw error;
     }
   }
+
+  async list(userId) {
+    try {
+      const { data, error } = await this.supabase
+        .from('users')
+        .select('id,name,email,avatar_url,status,last_online')
+        .neq('id', userId);
+      if (error) throw error;
+      return {
+        message: 'success',
+        data,
+      };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
 }

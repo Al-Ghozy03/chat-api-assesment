@@ -136,7 +136,28 @@ export class ChatService {
 
       const { data: checkRoom, error: errorRoom } = await this.supabase
         .from('chats')
-        .select('*')
+        .select(
+          `
+          id,
+          user_1:users!chats_user_1_fkey (
+              id,
+              name,
+              email,
+              avatar_url,
+              status,
+              last_online
+          ),
+          user_2:users!chats_user_2_fkey (
+            id,
+            name,
+            email,
+            avatar_url,
+            status,
+            last_online
+          ),
+          room_code
+        `,
+        )
         .or(
           `and(user_1.eq.${body.user_1},user_2.eq.${body.user_2}),and(user_1.eq.${body.user_2},user_2.eq.${body.user_1})`,
         )
@@ -151,7 +172,28 @@ export class ChatService {
             user_2: body.user_2,
             room_code: roomCode,
           })
-          .select()
+          .select(
+            `
+          id,
+          user_1:users!chats_user_1_fkey (
+              id,
+              name,
+              email,
+              avatar_url,
+              status,
+              last_online
+          ),
+          user_2:users!chats_user_2_fkey (
+            id,
+            name,
+            email,
+            avatar_url,
+            status,
+            last_online
+          ),
+          room_code
+        `,
+          )
           .single();
         return {
           message: 'success',
